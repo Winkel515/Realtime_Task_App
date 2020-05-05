@@ -7,6 +7,21 @@ import 'package:todo/socket/socket.dart';
 class TaskListModel extends ChangeNotifier {
   final List<Task> _tasks = [];
 
+  void populateTasks(String taskListJSON) {
+    _tasks.clear();
+    var taskList = jsonDecode(taskListJSON);
+    for (Map<String, dynamic> task in taskList) {
+      _tasks.add(
+        Task(
+          title: task['title'],
+          id: task['_id'],
+          status: task['status'],
+        ),
+      );
+    }
+    notifyListeners();
+  }
+
   void emitToggleTask(int index) {
     socket.emit('toggle_task', _tasks[index].id);
   }
