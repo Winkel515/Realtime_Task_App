@@ -7,7 +7,7 @@ class AddTaskScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    String newTaskTitle;
+    String newTaskTitle = '';
     return Container(
       color: Color(0xff757575),
       child: Container(
@@ -34,7 +34,7 @@ class AddTaskScreen extends StatelessWidget {
             FlatButton(
               color: Colors.lightBlueAccent,
               onPressed: () {
-                onSubmit(newTaskTitle);
+                if (newTaskTitle.trim() != '') onSubmit(newTaskTitle);
                 Navigator.pop(context);
               },
               child: Text(

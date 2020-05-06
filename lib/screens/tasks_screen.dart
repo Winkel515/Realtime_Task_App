@@ -10,23 +10,26 @@ class TasksScreen extends StatefulWidget {
   _TasksScreenState createState() => _TasksScreenState();
 }
 
-class _TasksScreenState extends State<TasksScreen>
-    with SingleTickerProviderStateMixin {
+class _TasksScreenState extends State<TasksScreen> {
   @override
   void initState() {
     super.initState();
+    TaskListModel taskListModel =
+        Provider.of<TaskListModel>(context, listen: false);
+
     socket.on('incoming_task', (taskJSON) {
-      Provider.of<TaskListModel>(context, listen: false)
-          .createIncomingTask(taskJSON);
+      taskListModel.createIncomingTask(taskJSON);
     });
     socket.on('incoming_toggle', (taskJSON) {
-      Provider.of<TaskListModel>(context, listen: false)
-          .incomingToggle(taskJSON);
+      taskListModel.incomingToggle(taskJSON);
     });
 
     socket.on('incoming_task_list', (taskListJSON) {
-      Provider.of<TaskListModel>(context, listen: false)
-          .populateTasks(taskListJSON);
+      taskListModel.populateTasks(taskListJSON);
+    });
+
+    socket.on('incoming_edited_task', (taskJSON) {
+      taskListModel.incomingEditedTask(taskJSON);
     });
   }
 

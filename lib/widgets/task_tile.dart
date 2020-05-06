@@ -1,17 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:todo/models/task.dart';
+import 'package:todo/socket/socket.dart';
 
 class TaskTile extends StatelessWidget {
-  final bool isChecked;
-  final String title;
-  final void Function(bool) checkboxCallback;
-  final void Function() deleteCallback;
+  final Task task;
   final Key key;
 
   TaskTile({
-    @required this.isChecked,
-    @required this.title,
-    @required this.checkboxCallback,
-    @required this.deleteCallback,
+    @required this.task,
     @required this.key,
   });
 
@@ -19,10 +15,62 @@ class TaskTile extends StatelessWidget {
   Widget build(BuildContext context) {
     return Dismissible(
       onDismissed: (_) {
-        deleteCallback();
+        task.emitDeleteTask();
       },
       direction: DismissDirection.endToStart,
       key: key,
+      child: ListTile(
+        title: GestureDetector(
+          onDoubleTap: () {
+            showDialog(
+                barrierDismissible: false,
+                context: context,
+                builder: (context) {
+                  TextEditingController controller =
+                      new TextEditingController(text: task.title);
+                  return AlertDialog(
+                    title: Text('Edit Task'),
+                    content: SingleChildScrollView(
+                      child: TextField(
+                        controller: controller,
+                      ),
+                    ),
+                    actions: <Widget>[
+                      FlatButton(
+                        child: Text('Cancel'),
+                        color: Colors.red,
+                        onPressed: () {
+                          Navigator.pop(context);
+                        },
+                      ),
+                      FlatButton(
+                        child: Text('Submit'),
+                        color: Colors.green,
+                        onPressed: () {
+                          if (controller.text.trim() != task.title)
+                            task.emitEditTask(controller.text.trim());
+                          Navigator.pop(context);
+                        },
+                      ),
+                    ],
+                  );
+                });
+          },
+          child: Text(
+            task.title,
+            style: TextStyle(
+              fontSize: 20,
+              color: Colors.black,
+              decoration: task.status ? TextDecoration.lineThrough : null,
+            ),
+          ),
+        ),
+        trailing: Checkbox(
+          value: task.status,
+          activeColor: Colors.lightBlueAccent,
+          onChanged: (_) => task.emitToggleTask(),
+        ),
+      ),
       background: Container(
         padding: EdgeInsets.only(right: 30),
         color: Colors.red,
@@ -46,21 +94,6 @@ class TaskTile extends StatelessWidget {
               size: 35,
             ),
           ],
-        ),
-      ),
-      child: ListTile(
-        title: Text(
-          title,
-          style: TextStyle(
-            fontSize: 20,
-            color: Colors.black,
-            decoration: isChecked ? TextDecoration.lineThrough : null,
-          ),
-        ),
-        trailing: Checkbox(
-          value: isChecked,
-          activeColor: Colors.lightBlueAccent,
-          onChanged: checkboxCallback,
         ),
       ),
     );

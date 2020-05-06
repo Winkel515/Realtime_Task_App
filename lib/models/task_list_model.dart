@@ -13,12 +13,7 @@ class TaskListModel extends ChangeNotifier {
     for (Task task in _tasks) {
       tasksTiles.add(
         TaskTile(
-          isChecked: task.status,
-          title: task.title,
-          checkboxCallback: (value) {
-            task.emitToggleTask();
-          },
-          deleteCallback: task.emitDeleteTask,
+          task: task,
           key: Key(task.id),
         ),
       );
@@ -85,6 +80,17 @@ class TaskListModel extends ChangeNotifier {
       status: decodedTask['status'],
     ));
     notifyListeners();
+  }
+
+  void incomingEditedTask(String taskJSON) {
+    var decodedTask = jsonDecode(taskJSON);
+    for (Task task in _tasks) {
+      if (task.id == decodedTask['_id']) {
+        task.title = decodedTask['title'];
+        notifyListeners();
+        break;
+      }
+    }
   }
 
   String getTitle(int index) {
