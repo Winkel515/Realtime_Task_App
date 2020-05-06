@@ -1,24 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:todo/models/task_list_model.dart';
-import 'package:todo/widgets/task_tile.dart';
 
 class TaskList extends StatelessWidget {
-  final TaskListModel taskModel;
+  final TaskListModel taskListModel;
 
-  TaskList({@required this.taskModel});
+  TaskList({@required this.taskListModel});
 
   @override
   Widget build(BuildContext context) {
-    return ListView.builder(
-      itemBuilder: (context, index) {
-        return TaskTile(
-            isChecked: taskModel.getStatus(index),
-            title: taskModel.getTitle(index),
-            checkboxCallback: (value) {
-              taskModel.emitToggleTask(index);
-            });
-      },
-      itemCount: taskModel.getSize(),
+    return ReorderableListView(
+      children: taskListModel.generateTaskTiles(),
+      onReorder: taskListModel.swapTasks,
+      header: SizedBox(
+        height: 40,
+      ),
     );
   }
 }

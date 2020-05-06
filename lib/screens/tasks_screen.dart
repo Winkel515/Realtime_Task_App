@@ -113,9 +113,9 @@ class _TasksScreenState extends State<TasksScreen>
             child: Container(
               padding: EdgeInsets.symmetric(horizontal: 14),
               child: Consumer<TaskListModel>(
-                builder: (context, taskModel, child) {
+                builder: (context, taskListModel, child) {
                   return TaskList(
-                    taskModel: taskModel,
+                    taskListModel: taskListModel,
                   );
                 },
               ),
