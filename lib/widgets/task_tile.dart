@@ -1,21 +1,23 @@
 import 'package:flutter/material.dart';
 import 'package:todo/models/task.dart';
-import 'package:todo/socket/socket.dart';
+import 'package:todo/models/task_list_model.dart';
 
 class TaskTile extends StatelessWidget {
   final Task task;
   final Key key;
+  final TaskListModel taskListModel;
 
   TaskTile({
     @required this.task,
     @required this.key,
+    @required this.taskListModel,
   });
 
   @override
   Widget build(BuildContext context) {
     return Dismissible(
       onDismissed: (_) {
-        task.emitDeleteTask();
+        taskListModel.deleteTask(task);
       },
       direction: DismissDirection.endToStart,
       key: key,
@@ -48,7 +50,10 @@ class TaskTile extends StatelessWidget {
                         color: Colors.green,
                         onPressed: () {
                           if (controller.text.trim() != task.title)
-                            task.emitEditTask(controller.text.trim());
+                            taskListModel.editTask(
+                              task: task,
+                              newTitle: controller.text.trim(),
+                            );
                           Navigator.pop(context);
                         },
                       ),
@@ -68,7 +73,7 @@ class TaskTile extends StatelessWidget {
         trailing: Checkbox(
           value: task.status,
           activeColor: Colors.lightBlueAccent,
-          onChanged: (_) => task.emitToggleTask(),
+          onChanged: (_) => taskListModel.toggleTask(task),
         ),
       ),
       background: Container(

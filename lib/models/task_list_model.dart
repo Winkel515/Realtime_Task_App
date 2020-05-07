@@ -15,6 +15,7 @@ class TaskListModel extends ChangeNotifier {
         TaskTile(
           task: task,
           key: Key(task.id),
+          taskListModel: this,
         ),
       );
     }
@@ -48,14 +49,20 @@ class TaskListModel extends ChangeNotifier {
     socket.emit('reorder_task', jsonTasks);
   }
 
-  void incomingToggle(String taskJSON) {
+  void incomingChange(String taskJSON) {
     var decodedTask = jsonDecode(taskJSON);
     for (Task task in _tasks) {
       if (task.id == decodedTask['_id']) {
+        task.title = decodedTask['title'];
         task.status = decodedTask['status'];
         break;
       }
     }
+    notifyListeners();
+  }
+
+  void incomingClearAllTasks() {
+    _tasks.clear();
     notifyListeners();
   }
 
@@ -72,6 +79,26 @@ class TaskListModel extends ChangeNotifier {
     );
   }
 
+  void deleteTask(Task task) {
+    socket.emit('delete_task', task.id);
+    for (int i = 0; i < _tasks.length; i++) {
+      if (_tasks[i].id == task.id) {
+        _tasks.removeAt(i);
+        notifyListeners();
+        break;
+      }
+    }
+  }
+
+  void editTask({@required Task task, @required String newTitle}) {
+    task.title = newTitle;
+    socket.emit('edit_task', jsonEncode(task.toMap()));
+  }
+
+  void toggleTask(Task task) {
+    socket.emit('toggle_task', task.id);
+  }
+
   void createIncomingTask(String taskJSON) {
     var decodedTask = jsonDecode(taskJSON);
     _tasks.add(Task(
@@ -82,15 +109,10 @@ class TaskListModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  void incomingEditedTask(String taskJSON) {
-    var decodedTask = jsonDecode(taskJSON);
-    for (Task task in _tasks) {
-      if (task.id == decodedTask['_id']) {
-        task.title = decodedTask['title'];
-        notifyListeners();
-        break;
-      }
-    }
+  void clearAllTasks() {
+    socket.emit('clear_all_tasks');
+    _tasks.clear();
+    notifyListeners();
   }
 
   String getTitle(int index) {

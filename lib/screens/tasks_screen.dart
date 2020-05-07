@@ -11,25 +11,27 @@ class TasksScreen extends StatefulWidget {
 }
 
 class _TasksScreenState extends State<TasksScreen> {
+  TaskListModel taskListModel;
+
   @override
   void initState() {
     super.initState();
-    TaskListModel taskListModel =
-        Provider.of<TaskListModel>(context, listen: false);
+    taskListModel = Provider.of<TaskListModel>(context, listen: false);
 
     socket.on('incoming_task', (taskJSON) {
       taskListModel.createIncomingTask(taskJSON);
-    });
-    socket.on('incoming_toggle', (taskJSON) {
-      taskListModel.incomingToggle(taskJSON);
     });
 
     socket.on('incoming_task_list', (taskListJSON) {
       taskListModel.populateTasks(taskListJSON);
     });
 
-    socket.on('incoming_edited_task', (taskJSON) {
-      taskListModel.incomingEditedTask(taskJSON);
+    socket.on('incoming_change', (taskJSON) {
+      taskListModel.incomingChange(taskJSON);
+    });
+
+    socket.on('incoming_clear_all_tasks', (_) {
+      taskListModel.incomingClearAllTasks();
     });
   }
 
@@ -42,7 +44,7 @@ class _TasksScreenState extends State<TasksScreen> {
         children: <Widget>[
           Container(
             padding: EdgeInsets.only(
-              top: 80,
+              top: 50,
               left: 30,
               right: 10,
               bottom: 30,
@@ -50,8 +52,52 @@ class _TasksScreenState extends State<TasksScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
-                SizedBox(
-                  height: 10,
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: <Widget>[
+                    SizedBox(
+                      height: 30,
+                      width: 70,
+                      child: FlatButton(
+                        onPressed: () {
+                          showDialog(
+                              context: context,
+                              builder: (context) {
+                                return AlertDialog(
+                                  title: Text('Clear All Tasks'),
+                                  content: Text(
+                                      'Are you sure that you want to permanently clear all tasks?'),
+                                  actions: <Widget>[
+                                    FlatButton(
+                                      onPressed: () {
+                                        Navigator.pop(context);
+                                      },
+                                      child: Text('CANCEL'),
+                                    ),
+                                    FlatButton(
+                                      onPressed: () {
+                                        taskListModel.clearAllTasks();
+                                        Navigator.pop(context);
+                                      },
+                                      child: Text('CLEAR'),
+                                      color: Colors.red,
+                                    ),
+                                  ],
+                                );
+                              });
+                        },
+                        child: Text(
+                          'Clear',
+                          style: TextStyle(color: Colors.white),
+                        ),
+                        splashColor: Colors.transparent,
+                        highlightColor: Colors.transparent,
+                      ),
+                    ),
+                    SizedBox(
+                      width: 10,
+                    ),
+                  ],
                 ),
                 Text(
                   'To do',
